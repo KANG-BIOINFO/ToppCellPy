@@ -9,7 +9,7 @@ def createBins(adata,
                 percentile = 75,
                 use_raw = False):
     """
-    Create pseudo-bulk bins for original data.
+    Create pseudo-bulk bins for original data.---
     """
     # get cell meta-data
     cell_meta = adata.obs
@@ -41,7 +41,6 @@ def createBins(adata,
         if (len(cells) ** binfactor) < 2:
             n_bins = 2
         else:
-<<<<<<< HEAD
             n_bins = round(len(cells) ** bin_factor)
         splitted_bins = get_chunk_id(np.array_split(cells, n_bins))
         bin_names = [(bg + "-bin-" + str(i)) for i in splitted_bins]
@@ -68,14 +67,6 @@ def createBins(adata,
 
     return bin_matrix
 
-=======
-            n_bins = round(len(cells) ** binfactor)
-        cells_split = get_chunk_id(np.array_split(cells, n_bins))
-        
-
-        
-
->>>>>>> parent of 3362eb3 (0922-1)
 def get_chunk_id(a):
     chunk_ids = []
     for i in range(len(a)):

@@ -1,7 +1,6 @@
 def compute_differential_analysis:
     """
     Do differential analysis.
-<<<<<<< HEAD
 
     Parameters
     ----------
@@ -80,6 +79,3 @@ def format_DEGs(adata):
                 b_merged[key] = list(b[0])
         
     return b_merged
-=======
-    """
->>>>>>> parent of 3362eb3 (0922-1)
