@@ -65,15 +65,16 @@ def createBins(adata,
 
     # create metadata for bin_id (information in bin_by group)
     bin_metadata = cell_meta.groupby(["bin_id"]).head(1) 
-    bin_metadata.rename("bin_id", axis = 0, inplace = True)
-    bin_metadata = bin_metadata[, bin_by]
+    bin_metadata.index = bin_metadata["bin_id"]
+    bin_metadata = bin_metadata[bin_by]
 
     # calculate bin matrix
     bin_matrix = pd.DataFrame(columns = adata.var_names, index = np.unique(adata.obs['bin_id']))
     for clust in np.unique(adata.obs['bin_id']): 
         bin_matrix.loc[clust] = adata[adata.obs['bin_id'].isin([clust]),:].X.mean(0)
+    bin_matrix = bin_matrix.T
 
-    return bin_matrix
+    return [bin_metadata, bin_matrix]
 
 def get_chunk_id(a):
     chunk_ids = []

@@ -1,4 +1,8 @@
-def compute_differential_analysis:
+import numpy as np
+import pandas as pd
+import scanpy as sc
+
+def compute_levelWise_differential_analysis(shred, target, reference, plan_name):
     """
     Do differential analysis.
 
@@ -10,6 +14,8 @@ def compute_differential_analysis:
             numerator level for DE analysis, e.g. stim or stim+cell
     reference
             denominator level for DE analysis, e.g. None (World)
+    plan_name
+            name of shred plan
     """
     adata = shred.adata
     cell_meta = adata.obs
@@ -44,7 +50,8 @@ def compute_differential_analysis:
     if reference == None:
         sc.tl.rank_genes_groups(adata, groupby = "target_value", pts = True, method = shred.method)
         df_deg = format_DEGs(adata)
-        df_deg["shred_plan"] = target + "|" + reference
+        df_deg["reference_group"] = ""
+        df_deg["shred_plan"] = plan_name
     else:
         df_deg = pd.DataFrame()
         for reference_i in np.unique(adata.obs["reference_value"]):
@@ -53,9 +60,11 @@ def compute_differential_analysis:
             df_deg_sub = format_DEGs(adata_sub)
             df_deg_sub["reference_group"] = reference_i
             df_deg = pd.concat([df_deg, df_deg_sub], axis = 0)
-        df_deg["shred_plan"] = target + "|" + reference
+        df_deg["shred_plan"] = plan_name
         
     return df_deg
+
+
 
 def format_DEGs(adata):
     keys = ["names","scores","logfoldchanges","pvals","pvals_adj","pts","pts_rest"]
