@@ -32,18 +32,50 @@ def createBins(adata,
     cell_count_list = list(cell_counts)
     bin_factor = calculate_bin_size_factor(cell_numList = cell_count_list, target_totalBins = target_totalBins)
 
+    print(len(np.unique(cell_meta["bin_group"])))
+    print(bin_factor)
+
     # create bins using chunk2
     for bg in np.unique(cell_meta["bin_group"]):
         cells = cell_meta.loc[cell_meta["bin_group"] == bg, :].index.values
         if (len(cells) ** binfactor) < 2:
             n_bins = 2
         else:
+<<<<<<< HEAD
+            n_bins = round(len(cells) ** bin_factor)
+        splitted_bins = get_chunk_id(np.array_split(cells, n_bins))
+        bin_names = [(bg + "-bin-" + str(i)) for i in splitted_bins]
+        df_bin_id_sub = pd.DataFrame(data = np.array(bin_names), index = cells, columns = ["bin_id"])
+        df_bin_id = pd.concat([df_bin_id, df_bin_id_sub], axis = 0)
+    
+    print(df_bin_id.shape)
+    print(df_bin_id.head(10))
+    print(len(np.unique(df_bin_id["bin_id"])))
+    # add bin id to metadata
+    df_bin_id = df_bin_id.loc[list(cell_meta.index.values), : ]
+    adata = adata[list(cell_meta.index.values), : ]
+    cell_meta["bin_id"] = df_bin_id["bin_id"]
+    adata.obs = cell_meta
+
+    # create metadata for bin_id (information in bin_by group)
+    # bin_metadata = 
+
+    # calculate bin matrix
+    
+    bin_matrix = pd.DataFrame(columns = adata.var_names, index = np.unique(adata.obs['bin_id']))
+    for clust in np.unique(adata.obs['bin_id']): 
+        bin_matrix.loc[clust] = adata[adata.obs['bin_id'].isin([clust]),:].X.mean(0)
+
+    return bin_matrix
+
+=======
             n_bins = round(len(cells) ** binfactor)
         cells_split = get_chunk_id(np.array_split(cells, n_bins))
         
 
         
 
+>>>>>>> parent of 3362eb3 (0922-1)
 def get_chunk_id(a):
     chunk_ids = []
     for i in range(len(a)):
@@ -83,7 +115,7 @@ def calculate_bin_size_factor(cell_numList, target_totalBins = 1000, bin_numVari
                 num_bins = 2
             else:
                 num_bins = round(n ** cf) # root value n ** cf is the number of bins in each cell label
-        sum += num_bins
+            sum += num_bins
     
         # test if we need to raise or reduce the converging value
         if sum < (target_totalBins - bin_numVariation_allowed):
