@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import scanpy as sc
 import warnings
 
 def createBins(adata, 
@@ -12,6 +14,10 @@ def createBins(adata,
     Create pseudo-bulk bins for original data.---
     """
     # get cell meta-data
+    if "n_counts" not in adata.obs.columns:
+        sc.pp.filter_cells(adata, min_counts = 0)
+        sc.pp.filter_cells(adata, min_genes = 0)
+
     cell_meta = adata.obs
 
     # create bin groups
@@ -36,9 +42,10 @@ def createBins(adata,
     print(bin_factor)
 
     # create bins using chunk2
+    df_bin_id = pd.DataFrame()
     for bg in np.unique(cell_meta["bin_group"]):
         cells = cell_meta.loc[cell_meta["bin_group"] == bg, :].index.values
-        if (len(cells) ** binfactor) < 2:
+        if (len(cells) ** bin_factor) < 2:
             n_bins = 2
         else:
             n_bins = round(len(cells) ** bin_factor)
@@ -57,10 +64,11 @@ def createBins(adata,
     adata.obs = cell_meta
 
     # create metadata for bin_id (information in bin_by group)
-    # bin_metadata = 
+    bin_metadata = cell_meta.groupby(["bin_id"]).head(1) 
+    bin_metadata.rename("bin_id", axis = 0, inplace = True)
+    bin_metadata = bin_metadata[, bin_by]
 
     # calculate bin matrix
-    
     bin_matrix = pd.DataFrame(columns = adata.var_names, index = np.unique(adata.obs['bin_id']))
     for clust in np.unique(adata.obs['bin_id']): 
         bin_matrix.loc[clust] = adata[adata.obs['bin_id'].isin([clust]),:].X.mean(0)
