@@ -67,9 +67,10 @@ class Shred:
             self.shred_module[sub_plan] = df_deg
             df_deg_combined = pd.concat([df_deg_combined, df_deg], axis = 0)            
         
+        self.shred_modules_df = df_deg_combined
         return df_deg_combined
     
-    def create_heatmap_matrix(self, plans, top_n_genes = 200):
+    def create_heatmap_matrix(self, plans = None, top_n_genes = 200):
         """
         Create heatmap matrix.
         """
@@ -78,18 +79,19 @@ class Shred:
         
         # get bin table
         df_bin_meta = df_bin_meta.sort_values(self.bin_group)
-        df_bin = df_bin.loc[list(df_bin_meta.columns), : ]
+        df_bin = df_bin[list(df_bin_meta.index.values)]
 
         # get organized gene modules ready
-        df_DEG = compute_differential_analysis(self)
+        # df_DEG = compute_differential_analysis(self)
+        df_DEG = self.shred_modules_df
         df_subsetDEG = df_DEG.groupby(["Status"]).head(top_n_genes)
         df_subsetDEG = df_subsetDEG.sort_values(["shred_plan", "reference_group", "Status", "pts"], ascending = [True, True, True, False])
 
         # create heatmap
         df_heatmap = df_bin.loc[list(df_subsetDEG.index.values),:]
-        self.heatmap_matrix = heatmap
+        self.heatmap_matrix = df_heatmap
 
-        return heatmap
+        return df_heatmap
 
     def createJson(self):
         """
