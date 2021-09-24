@@ -3,6 +3,7 @@ import pandas as pd
 import scanpy as sc
 from ._differential import compute_levelWise_differential_analysis
 from ._pseudo import createBins
+from ._visualize import heatmap
 
 class Shred:
     """
@@ -74,6 +75,8 @@ class Shred:
         """
         Create heatmap matrix.
         """
+        self.top_n_genes = top_n_genes
+
         df_bin_meta = self.bin_metadata
         df_bin = self.bin_matrix
         
@@ -90,8 +93,13 @@ class Shred:
         # create heatmap
         df_heatmap = df_bin.loc[list(df_subsetDEG.index.values),:]
         self.heatmap_matrix = df_heatmap
+        self.shred_modules_df_2 = df_subsetDEG
 
-        return df_heatmap
+        
+        return [df_heatmap, df_subsetDEG]
+
+    def draw_heatmap(self, output_name):
+        heatmap(self, output_name)        
 
     def createJson(self):
         """

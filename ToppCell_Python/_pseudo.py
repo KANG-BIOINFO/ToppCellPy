@@ -76,6 +76,14 @@ def createBins(adata,
 
     return [bin_metadata, bin_matrix]
 
+
+def createSuperbins(a):
+    """
+    Create superbin
+    """
+    return 0
+
+
 def get_chunk_id(a):
     chunk_ids = []
     for i in range(len(a)):
