@@ -30,7 +30,7 @@ def heatmap(shred, output_name = "heatmap.png"):
     df_heatmap = shred.heatmap_matrix.copy() # load heatmap matrix
     df_bin_meta = shred.bin_metadata.loc[df_heatmap.columns, :].copy() # order the bin metadata
     df_subsetDEG = shred.shred_modules_df_2.copy() # load the gene module annotation dataframe
-    n_genes = df_heatmap.shape[1]
+    n_genes = df_heatmap.shape[0]
     n_bins = df_heatmap.shape[1]
     n_modules = len(np.unique(df_subsetDEG["Status"]))
 
@@ -103,6 +103,11 @@ def heatmap(shred, output_name = "heatmap.png"):
     sns.heatmap(df_heatmap, vmin = 0, vmax = 10, yticklabels=False, xticklabels=False, cmap = "bwr", ax = ax2, cbar = False)
 
     fig.savefig(output_name)
+
+
+def draw_module_enrichment(shred, top_n_modules):
+    df_module_enrichment = shred.df_module_enrichment
+
 
 def correlation_bins(shred):
     """

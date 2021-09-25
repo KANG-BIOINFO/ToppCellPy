@@ -2,13 +2,14 @@ import pandas as pd
 import numpy as np 
 import scanpy as sc
 import sys
+import pickle
 
-sys.path.insert(1, '/Users/kang/Dropbox/Code/ToppCell-Python/')
+sys.path.insert(1, '/Users/jinmr2/Dropbox/Code/ToppCell-Python/')
 import ToppCell_Python as tp
 
-path = "/Users/kang/Dropbox/Code/data/toppcell_test/"
+path = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/"
 
-adata = sc.read("/Users/kang/Dropbox/Code/data/batch2_all_normalized_filtered.h5ad")
+adata = sc.read("/Users/jinmr2/Dropbox/Code/data/batch2_all_normalized_filtered.h5ad")
 
 # create bins
 '''
@@ -27,7 +28,6 @@ shred = tp.Shred(adata = adata,
 df_deg_combined = shred.do_shredplan()
 df_deg_combined.to_csv(path + "deg_shredplan.txt", sep = "\t")
 
-
 # make heatmap table
 df_heatmap, df_genemodule = shred.create_heatmap_matrix()
 df_heatmap.to_csv(path + "heatmap_matrix.txt", sep = "\t")
@@ -37,4 +37,6 @@ shred.bin_metadata.to_csv(path + "bin_metadata.txt",sep = "\t")
 # draw heatmap figure
 shred.draw_heatmap(output_name = path + "heatmap.png")
 
-# generate heatmap figure 
+# do enrichment for all modules
+df_module_enrich = shred.enrich_modules(categories = ["GeneOntologyCellularComponent"])
+df_module_enrich.to_csv(path + "module_enrichments.txt", sep = "\t")

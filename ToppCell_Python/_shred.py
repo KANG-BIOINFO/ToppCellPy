@@ -4,6 +4,7 @@ import scanpy as sc
 from ._differential import compute_levelWise_differential_analysis
 from ._pseudo import createBins
 from ._visualize import heatmap
+from ._enrich import module_enrich
 
 class Shred:
     """
@@ -92,6 +93,7 @@ class Shred:
 
         # create heatmap
         df_heatmap = df_bin.loc[list(df_subsetDEG.index.values),:]
+        df_heatmap = df_heatmap.astype(float)
         self.heatmap_matrix = df_heatmap
         self.shred_modules_df_2 = df_subsetDEG
 
@@ -99,7 +101,32 @@ class Shred:
         return [df_heatmap, df_subsetDEG]
 
     def draw_heatmap(self, output_name):
-        heatmap(self, output_name)        
+        heatmap(self, output_name)
+
+    def enrich_modules(self, categories = ["GeneOntologyBiologicalProcess", "Pathway"]):
+        df_subsetDEG = self.shred_modules_df_2 
+        
+        df_enrich_output_all = pd.DataFrame()
+        for status in np.unique(df_subsetDEG["Status"]):
+            df_genelist = df_subsetDEG.loc[df_subsetDEG["Status"] == status, :]
+            
+            target = df_genelist.iloc[0, 1]
+            reference = df_genelist.iloc[0, 7]
+            module_name = (target + "|" + reference) if reference != "" else target
+            
+            df_genelist["genes"] = df_genelist.index.values # reformat the table
+            df_genelist = df_genelist[["genes", "scores"]]
+            
+            # do enrichment
+            df_enrich_output = module_enrich(df_genelist, terms = categories)
+            df_enrich_output["module"] = module_name 
+
+            df_enrich_output_all = pd.concat([df_enrich_output_all, df_enrich_output], axis = 0)
+
+        self.df_module_enrichment = df_enrich_output_all
+        
+        return df_enrich_output_all
+            
 
     def createJson(self):
         """
