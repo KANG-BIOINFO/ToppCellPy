@@ -40,3 +40,7 @@ shred.draw_heatmap(output_name = path + "heatmap.png")
 # do enrichment for all modules
 df_module_enrich = shred.enrich_modules(categories = ["GeneOntologyCellularComponent"])
 df_module_enrich.to_csv(path + "module_enrichments.txt", sep = "\t")
+
+# draw toppcluster plot
+df_toppcluster = shred.toppcluster()
+df_toppcluster.to_csv(path + "toppcluster_modules.txt", sep = "\t")

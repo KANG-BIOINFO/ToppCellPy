@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd 
 import scanpy as sc
+import matplotlib.pyplot as plt 
+import seaborn
 from ._differential import compute_levelWise_differential_analysis
 from ._pseudo import createBins
 from ._visualize import heatmap
-from ._enrich import module_enrich_ranked
+from ._enrich import module_enrich_ranked, module_enrich, apply_toppcluster
 
 class Shred:
     """
@@ -105,15 +107,16 @@ class Shred:
 
     def enrich_modules(self, categories = ["GeneOntologyBiologicalProcess", "Pathway"], ranked = False):
         df_subsetDEG = self.shred_modules_df_2 
+        self.enrich_ranked = ranked
         
         df_enrich_output_all = pd.DataFrame()
         for status in np.unique(df_subsetDEG["Status"]):
             df_genelist = df_subsetDEG.loc[df_subsetDEG["Status"] == status, :]
             
-            target = df_genelist.iloc[0, 1]
+            target = df_genelist.iloc[0, 0]
             reference = df_genelist.iloc[0, 7]
-            module_name = (target + "|" + reference) if reference != "" else target
-            
+            module_name = (str(target) + "|" + str(reference)) if reference != "" else target
+
             df_genelist["genes"] = df_genelist.index.values # reformat the table
             df_genelist = df_genelist[["genes", "scores"]]
             
@@ -121,8 +124,8 @@ class Shred:
             if ranked == True:
                 df_enrich_output = module_enrich_ranked(df_genelist, terms = categories)
             else:
-                df_genelist = df_genelist[["gene"]]
-                df_enrich_output = module_enrich_ranked(df_genelist, terms = categories)
+                df_genelist = df_genelist[["genes"]]
+                df_enrich_output = module_enrich(df_genelist, terms = categories)
 
             df_enrich_output["module"] = module_name 
             df_enrich_output_all = pd.concat([df_enrich_output_all, df_enrich_output], axis = 0)
@@ -130,7 +133,22 @@ class Shred:
         self.df_module_enrichment = df_enrich_output_all
 
         return df_enrich_output_all
+
+    
+    def toppcluster(self, output_name = None, draw_plot = True):
+        """
+        run toppcluster for all modules and do clustering on heatmap
+        """
+        df_toppcluster_modulemap = apply_toppcluster(self)
+        fig, ax = plt.subplots()
+        sns.clustermap(df_toppcluster_modulemap, ax = ax)
+        if draw_plot == True:
+            fig.save("toppcluster_map.png")
+
+        if output_name != None:
+            df_toppcluster_modulemap.to_csv(output_name, sep = "\t")
             
+        return df_toppcluster_modulemap
 
     def createJson(self):
         """
