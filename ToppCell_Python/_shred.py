@@ -4,7 +4,7 @@ import scanpy as sc
 from ._differential import compute_levelWise_differential_analysis
 from ._pseudo import createBins
 from ._visualize import heatmap
-from ._enrich import module_enrich
+from ._enrich import module_enrich_ranked
 
 class Shred:
     """
@@ -103,7 +103,7 @@ class Shred:
     def draw_heatmap(self, output_name):
         heatmap(self, output_name)
 
-    def enrich_modules(self, categories = ["GeneOntologyBiologicalProcess", "Pathway"]):
+    def enrich_modules(self, categories = ["GeneOntologyBiologicalProcess", "Pathway"], ranked = False):
         df_subsetDEG = self.shred_modules_df_2 
         
         df_enrich_output_all = pd.DataFrame()
@@ -118,13 +118,17 @@ class Shred:
             df_genelist = df_genelist[["genes", "scores"]]
             
             # do enrichment
-            df_enrich_output = module_enrich(df_genelist, terms = categories)
-            df_enrich_output["module"] = module_name 
+            if ranked == True:
+                df_enrich_output = module_enrich_ranked(df_genelist, terms = categories)
+            else:
+                df_genelist = df_genelist[["gene"]]
+                df_enrich_output = module_enrich_ranked(df_genelist, terms = categories)
 
+            df_enrich_output["module"] = module_name 
             df_enrich_output_all = pd.concat([df_enrich_output_all, df_enrich_output], axis = 0)
 
         self.df_module_enrichment = df_enrich_output_all
-        
+
         return df_enrich_output_all
             
 
