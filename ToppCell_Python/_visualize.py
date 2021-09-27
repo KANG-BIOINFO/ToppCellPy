@@ -107,6 +107,7 @@ def heatmap(shred, output_name = "heatmap.png"):
 
 def draw_module_enrichment(shred, top_n_modules):
     df_module_enrichment = shred.df_module_enrichment
+    
 
 
 def correlation_bins(shred):
