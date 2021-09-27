@@ -28,7 +28,7 @@ def module_enrich_ranked(ranked_gene_table,
         pre_res = gp.prerank(rnk = ranked_gene_table,
                             gene_sets = ref,
                             processes = 4, permutation_num = 100,
-                            min_size = min_size, max_size = max_size)
+                            min_size = min_size, max_size = max_size, outdir = None, no_plot = True)
         res2d = pre_res.res2d .sort_values(["fdr"], ascending = True)
         res2d["Category"] = term
         gsea_output = pd.concat([gsea_output, res2d], axis = 0)
@@ -55,7 +55,8 @@ def module_enrich(gene_table,
         ref = enrich_all_dicts[term]
         enrichr_res = gp.enrichr(gene_list = gene_table,
                                 gene_sets = ref,
-                                cutoff = 1)
+                                cutoff = 1,
+                                outdir = None, no_plot = True)
         res2d = enrichr_res.res2d .sort_values(["Adjusted P-value"], ascending = True)
         res2d["Category"] = term
         gsea_output = pd.concat([gsea_output, res2d], axis = 0)
@@ -66,7 +67,7 @@ def apply_toppcluster(shred):
     """
     Apply ToppCluster enrichment across gene modules.
     """
-    df_module_enrichment = self.df_module_enrichment
+    df_module_enrichment = shred.df_module_enrichment
     df_module_enrichment["enrichment score"] = [-np.log10(i + THETA_LOWER_BORDER) for i in df_module_enrichment["Adjusted P-value"]]
     
     all_enriched_terms = np.unique(df_module_enrichment["Term"])
@@ -75,9 +76,9 @@ def apply_toppcluster(shred):
     df_toppcluster_neglog10pval = pd.DataFrame(index = all_modules, columns = all_enriched_terms, data = 0)
     
     for row in range(df_module_enrichment.shape[0]):
-        term = df_module_enrichment.iloc[i, 1]
-        module = df_module_enrichment.iloc[i, 7]
-        score = df_module_enrichment.iloc[i, 8]
+        term = df_module_enrichment.iloc[row, 1]
+        module = df_module_enrichment.iloc[row, 7]
+        score = df_module_enrichment.iloc[row, 8]
         df_toppcluster_neglog10pval.loc[module, term] = score 
 
     return df_toppcluster_neglog10pval

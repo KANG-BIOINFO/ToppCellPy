@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd 
 import scanpy as sc
 import matplotlib.pyplot as plt 
-import seaborn
+import seaborn as sns
 from ._differential import compute_levelWise_differential_analysis
 from ._pseudo import createBins
 from ._visualize import heatmap
@@ -147,7 +147,7 @@ class Shred:
 
         if output_name != None:
             df_toppcluster_modulemap.to_csv(output_name, sep = "\t")
-            
+
         return df_toppcluster_modulemap
 
     def createJson(self):
@@ -173,11 +173,3 @@ def get_all_terms(terms):
         else:
             all_terms += term.split("+")
             
-
-
-
-
-        
-        
-
-
