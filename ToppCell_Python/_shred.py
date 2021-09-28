@@ -140,8 +140,8 @@ class Shred:
         run toppcluster for all modules and do clustering on heatmap
         """
         df_toppcluster_modulemap = apply_toppcluster(self)
-        fig, ax = plt.subplots()
-        sns.clustermap(df_toppcluster_modulemap, ax = ax)
+        # fig, ax = plt.subplots()
+        fig = sns.clustermap(df_toppcluster_modulemap, ax = ax)
         if draw_plot == True:
             fig.save("toppcluster_map.png")
 
