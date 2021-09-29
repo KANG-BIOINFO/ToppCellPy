@@ -143,7 +143,7 @@ class Shred:
         # fig, ax = plt.subplots()
         fig = sns.clustermap(df_toppcluster_modulemap)
         if draw_plot == True:
-            fig.figsave("toppcluster_map.png")
+            fig.savefig("toppcluster_map.png")
 
         if output_name != None:
             df_toppcluster_modulemap.to_csv(output_name, sep = "\t")
