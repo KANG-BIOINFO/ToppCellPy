@@ -6,6 +6,7 @@ import pickle
 
 sys.path.insert(1, '/Users/jinmr2/Dropbox/Code/ToppCell-Python/')
 import ToppCell_Python as tp
+import time 
 
 path = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/"
 

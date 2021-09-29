@@ -141,9 +141,9 @@ class Shred:
         """
         df_toppcluster_modulemap = apply_toppcluster(self)
         # fig, ax = plt.subplots()
-        fig = sns.clustermap(df_toppcluster_modulemap, ax = ax)
+        fig = sns.clustermap(df_toppcluster_modulemap)
         if draw_plot == True:
-            fig.save("toppcluster_map.png")
+            fig.figsave("toppcluster_map.png")
 
         if output_name != None:
             df_toppcluster_modulemap.to_csv(output_name, sep = "\t")

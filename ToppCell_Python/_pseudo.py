@@ -38,9 +38,6 @@ def createBins(adata,
     cell_count_list = list(cell_counts)
     bin_factor = calculate_bin_size_factor(cell_numList = cell_count_list, target_totalBins = target_totalBins)
 
-    print(len(np.unique(cell_meta["bin_group"])))
-    print(bin_factor)
-
     # create bins using chunk2
     df_bin_id = pd.DataFrame()
     for bg in np.unique(cell_meta["bin_group"]):
@@ -54,9 +51,6 @@ def createBins(adata,
         df_bin_id_sub = pd.DataFrame(data = np.array(bin_names), index = cells, columns = ["bin_id"])
         df_bin_id = pd.concat([df_bin_id, df_bin_id_sub], axis = 0)
     
-    print(df_bin_id.shape)
-    print(df_bin_id.head(10))
-    print(len(np.unique(df_bin_id["bin_id"])))
     # add bin id to metadata
     df_bin_id = df_bin_id.loc[list(cell_meta.index.values), : ]
     adata = adata[list(cell_meta.index.values), : ]
