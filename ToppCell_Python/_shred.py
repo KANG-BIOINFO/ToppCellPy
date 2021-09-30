@@ -52,6 +52,7 @@ class Shred:
         self.bin_min_cells = 5
         self.order_modules = order_modules # the order of modules in heatmap
         self.method = method
+        self.save_output = save_output
         
         self.order_bins = self.bin_group if order_bins == None else order_bins
         self.shred_module = {}
@@ -62,7 +63,7 @@ class Shred:
                                                         min_cells = bin_min_cells, target_totalBins = bin_num)
         
         if output_dir != None:
-            if not os.path.isdir("output"):    
+            if not os.path.isdir(output_dir + "/output"):    
                 self.output_folder = output_dir + "/output/"
             else:
                 self.output_folder = outout_dir + "/output_" + str(datetime.datetime.now()) + "/"
@@ -105,6 +106,7 @@ class Shred:
         top_n_genes
                 Number of most significant genes to show in each gene module.
         """
+
         self.top_n_genes = top_n_genes
 
         df_bin_meta = self.bin_metadata
@@ -115,7 +117,11 @@ class Shred:
         df_bin = df_bin[list(df_bin_meta.index.values)]
 
         # get organized gene modules ready
-        df_DEG = self.shred_modules_df
+        try:
+            df_DEG = self.shred_modules_df
+        except AttributeError:
+            raise Exception("Level-wise comparison should be done first using do_shredplan prior to creating heatmap.")
+
         df_subsetDEG = df_DEG.groupby(["Status"]).head(top_n_genes)
         df_subsetDEG = df_subsetDEG.sort_values(["shred_plan", "reference_group", "Status", "pts"], ascending = [True, True, True, False])
 
@@ -138,7 +144,12 @@ class Shred:
         """
         if self.save_output:
             os.mkdir(self.output_folder + "figures/")
-            output_name = self.output_folder + "figures/" output_name
+            output_name = self.output_folder + "figures/" + output_name
+        
+        try:
+            self.heatmap_matrix
+        except AttributeError:
+            raise Exception("Heatmap should be created using create_heatmap_matrix prior to drawing it.")
 
         heatmap(self, output_name, save_output = self.save_output)
 
@@ -164,7 +175,10 @@ class Shred:
                 Whether use pre-ranked enrichment or not. Default is False. 
                 For more information, please check package gseapy (https://gseapy.readthedocs.io/en/latest/introduction.html).
         """
-        df_subsetDEG = self.shred_modules_df_2 
+        try:
+            df_subsetDEG = self.shred_modules_df_2 
+        except AttributeError:
+            raise Exception("Gene modules should be generated using create_heatmap_matrix prior to gene module enrichment.")
         self.enrich_ranked = ranked
         
         df_enrich_output_all = pd.DataFrame()
@@ -204,7 +218,11 @@ class Shred:
         draw_plot
                 Whether to draw a toppcluster map for comparative enrichment analysis.
         """
-
+        try:
+            self.df_module_enrichment
+        except AttributeError:
+            raise Exception("Module enrichment should be done prior to ToppCluster map generation.")
+            
         df_toppcluster_modulemap = apply_toppcluster(self)
         df_toppcluster_modulemap.to_csv(self.output_folder + "enrichment_toppcluster.txt", sep = "\t")
 
@@ -231,6 +249,12 @@ class Shred:
         
         return 1
 
+    
+    def toppcell_batchRun(self):
+        """
+
+        """
+        return 1
 
 
 def get_all_terms(terms):
