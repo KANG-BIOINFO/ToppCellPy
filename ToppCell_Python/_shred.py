@@ -1,8 +1,12 @@
+import os
+import datetime
 import numpy as np
 import pandas as pd 
 import scanpy as sc
+
 import matplotlib.pyplot as plt 
 import seaborn as sns
+
 from ._differential import compute_levelWise_differential_analysis
 from ._pseudo import createBins
 from ._visualize import heatmap
@@ -26,6 +30,8 @@ class Shred:
             orders of modules
     method
             statistical methods for differential expression analysis
+
+    
     """
     def __init__(
         self,
@@ -36,28 +42,36 @@ class Shred:
         bin_min_cells = 5,
         order_bins = None,
         order_modules = None,
-        method = "wilcoxon"
+        method = "wilcoxon",
+        output_dir = "./"
     ):
         self.adata = adata
-        self.shred_plan = shred_plan
-        self.bin_group = bin_group
+        self.shred_plan = shred_plan # plan for shred (gene module generation)
+        self.bin_group = bin_group # the way to make pseudo-bulk bins
         self.bin_num = 1000
         self.bin_min_cells = 5
-        self.order_modules = order_modules
+        self.order_modules = order_modules # the order of modules in heatmap
         self.method = method
-        if order_bins == None:
-            self.order_bins = self.bin_group
-        else:
-            self.order_bins = order_bins
-
+        
+        self.order_bins = self.bin_group if order_bins == None else order_bins
         self.shred_module = {}
         self.module_groups = get_all_terms(shred_plan)
         
+        # create bins for heatmap visualization
         self.bin_metadata, self.bin_matrix = createBins(adata, bin_by = bin_group, min_cells = bin_min_cells, target_totalBins = bin_num)
-    
+        
+        if output_dir != None:
+            if not os.path.isdir("output"):    
+                self.output_folder = output_dir + "/output/"
+            else:
+                self.output_folder = outout_dir + "/output_" + str(datetime.datetime.now()) + "/"
+
+            os.mkdir(self.output_folder)
+
+
     def do_shredplan(self):
         """
-        Run the user-customed shred plan
+        Run the user-customized shred plan
         """
         df_deg_combined = pd.DataFrame()
         for sub_plan in self.shred_plan:
@@ -141,7 +155,8 @@ class Shred:
         """
         df_toppcluster_modulemap = apply_toppcluster(self)
         # fig, ax = plt.subplots()
-        fig = sns.clustermap(df_toppcluster_modulemap)
+        fig = sns.clustermap(df_toppcluster_modulemap, vmin = 0, vmax = 10, 
+                                figsize=(15,15), xticklabels = False, yticklabels = True)
         if draw_plot == True:
             fig.savefig("toppcluster_map.png")
 
@@ -172,4 +187,3 @@ def get_all_terms(terms):
             all_terms.append(term)
         else:
             all_terms += term.split("+")
-            
