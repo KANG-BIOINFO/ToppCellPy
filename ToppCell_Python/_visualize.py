@@ -22,7 +22,7 @@ params = {
 plt.rcParams.update(params)
 
 
-def heatmap(shred, output_name = "heatmap.png"):
+def heatmap(shred, output_name = "heatmap.png", save_output = True):
     """
     Draw the heatmap for gene modules
     """
@@ -102,7 +102,8 @@ def heatmap(shred, output_name = "heatmap.png"):
     ax2 = fig.add_subplot(gs[2,0])
     sns.heatmap(df_heatmap, vmin = 0, vmax = 10, yticklabels=False, xticklabels=False, cmap = "bwr", ax = ax2, cbar = False)
 
-    fig.savefig(output_name)
+    if save_output:
+        fig.savefig(output_name)
 
 
 def draw_module_enrichment(shred, top_n_modules):

@@ -39,23 +39,23 @@ shred = tp.Shred(adata = adata,
             order_bins = None,
             order_modules = None,
             method = "wilcoxon")
-df_deg_combined = shred.do_shredplan()
+shred.do_shredplan()
 ```
 
 Create heatmap data frame and draw heatmap
 ```python
-df_heatmap, df_genemodule = shred.create_heatmap_matrix()
+shred.create_heatmap_matrix()
 shred.draw_heatmap("heatmap.png")
 ```
 
 Do enrichment for all modules
 ```python
-df_module_enrich = shred.enrich_modules(categories = ["GeneOntologyCellularComponent"])
+shred.enrich_modules(categories = ["GeneOntologyCellularComponent"])
 ```
 
 Draw ToppCluster plot
 ```python
-df_toppcluster = shred.toppcluster()
+shred.toppcluster()
 ```
 
 

@@ -30,9 +30,8 @@ class Shred:
             orders of modules
     method
             statistical methods for differential expression analysis
-
-    
     """
+
     def __init__(
         self,
         adata,
@@ -43,7 +42,8 @@ class Shred:
         order_bins = None,
         order_modules = None,
         method = "wilcoxon",
-        output_dir = "./"
+        output_dir = "./",
+        save_output = True
     ):
         self.adata = adata
         self.shred_plan = shred_plan # plan for shred (gene module generation)
@@ -58,20 +58,24 @@ class Shred:
         self.module_groups = get_all_terms(shred_plan)
         
         # create bins for heatmap visualization
-        self.bin_metadata, self.bin_matrix = createBins(adata, bin_by = bin_group, min_cells = bin_min_cells, target_totalBins = bin_num)
+        self.bin_metadata, self.bin_matrix = createBins(adata, bin_by = bin_group, 
+                                                        min_cells = bin_min_cells, target_totalBins = bin_num)
         
         if output_dir != None:
             if not os.path.isdir("output"):    
                 self.output_folder = output_dir + "/output/"
             else:
                 self.output_folder = outout_dir + "/output_" + str(datetime.datetime.now()) + "/"
-
             os.mkdir(self.output_folder)
+            
+            if self.save_output:
+                self.bin_metadata.to_csv(self.output_folder + "bin_metadata.txt", sep = "\t")
+                self.bin_matrix.to_csv(self.output_folder + "bin_matrix.txt", sep = "\t")
 
 
     def do_shredplan(self):
         """
-        Run the user-customized shred plan
+        Run the user-customized shred plan, where hierarchical gene modules will be generated.
         """
         df_deg_combined = pd.DataFrame()
         for sub_plan in self.shred_plan:
@@ -85,12 +89,21 @@ class Shred:
             self.shred_module[sub_plan] = df_deg
             df_deg_combined = pd.concat([df_deg_combined, df_deg], axis = 0)            
         
-        self.shred_modules_df = df_deg_combined
-        return df_deg_combined
+        self.shred_modules_df = df_deg_combined        
+        if self.save_output:
+            self.shred_modules_df.to_csv(self.output_folder + "genemodules_all.txt", sep = "\t")
+                
+        # return df_deg_combined
     
-    def create_heatmap_matrix(self, plans = None, top_n_genes = 200):
+
+    def create_heatmap_matrix(self, top_n_genes = 200):
         """
-        Create heatmap matrix.
+        Create heatmap matrix based on the generated gene modules.
+
+        Parameters
+        ----------
+        top_n_genes
+                Number of most significant genes to show in each gene module.
         """
         self.top_n_genes = top_n_genes
 
@@ -102,7 +115,6 @@ class Shred:
         df_bin = df_bin[list(df_bin_meta.index.values)]
 
         # get organized gene modules ready
-        # df_DEG = compute_differential_analysis(self)
         df_DEG = self.shred_modules_df
         df_subsetDEG = df_DEG.groupby(["Status"]).head(top_n_genes)
         df_subsetDEG = df_subsetDEG.sort_values(["shred_plan", "reference_group", "Status", "pts"], ascending = [True, True, True, False])
@@ -113,13 +125,45 @@ class Shred:
         self.heatmap_matrix = df_heatmap
         self.shred_modules_df_2 = df_subsetDEG
 
-        
-        return [df_heatmap, df_subsetDEG]
+        if self.save_output:
+            self.heatmap_matrix.to_csv(self.output_folder + "heatmap_matrix.txt", sep = "\t")
+            self.shred_modules_df_2.to_csv(self.output_folder + "genemodules_heatmap.txt", sep = "\t")
 
-    def draw_heatmap(self, output_name):
-        heatmap(self, output_name)
+        # return [df_heatmap, df_subsetDEG]
 
-    def enrich_modules(self, categories = ["GeneOntologyBiologicalProcess", "Pathway"], ranked = False):
+
+    def draw_heatmap(self, output_name = "heatmap.png"):
+        """
+        Draw heatmap based on gene modules generated. Run after create_heatmap_matrix
+        """
+        if self.save_output:
+            os.mkdir(self.output_folder + "figures/")
+            output_name = self.output_folder + "figures/" output_name
+
+        heatmap(self, output_name, save_output = self.save_output)
+
+
+    def enrich_modules(self, 
+                       categories = ["GeneOntologyMolecularFunction", 
+                                    "GeneOntologyBiologicalProcess", 
+                                    "GeneOntologyCellularComponent", 
+                                    "Pathway", 
+                                    "MousePheno"], 
+                       ranked = False):
+        """
+        Do enrichment for gene modules generated. ToppGene curated enrichment knowledge is used.
+
+        Parameters
+        ----------
+        categories
+                Gene enrichment analysis categories used. 
+                Current curation include GeneOntologyBiologicalProcess, GeneOntologyCellularComponent, 
+                                         GeneOntologyMolecularFunction, MousePheno, Pathway. 
+                More categories will be added later. For more information, please check https://toppgene.cchmc.org/
+        ranked
+                Whether use pre-ranked enrichment or not. Default is False. 
+                For more information, please check package gseapy (https://gseapy.readthedocs.io/en/latest/introduction.html).
+        """
         df_subsetDEG = self.shred_modules_df_2 
         self.enrich_ranked = ranked
         
@@ -144,40 +188,49 @@ class Shred:
             df_enrich_output["module"] = module_name 
             df_enrich_output_all = pd.concat([df_enrich_output_all, df_enrich_output], axis = 0)
 
-        self.df_module_enrichment = df_enrich_output_all
+        if self.save_output:
+            self.df_module_enrichment = df_enrich_output_all
+            self.df_module_enrichment.to_csv(self.output_folder + "enrichment.txt", sep = "\t")
 
-        return df_enrich_output_all
+        # return df_enrich_output_all
 
     
-    def toppcluster(self, output_name = None, draw_plot = True):
+    def toppcluster(self, draw_plot = True):
         """
-        run toppcluster for all modules and do clustering on heatmap
+        run toppcluster for all modules and do clustering on heatmap. Check ToppCluster (https://toppcluster.cchmc.org/) for more details.
+
+        Parameters
+        ----------
+        draw_plot
+                Whether to draw a toppcluster map for comparative enrichment analysis.
         """
+
         df_toppcluster_modulemap = apply_toppcluster(self)
-        # fig, ax = plt.subplots()
+        df_toppcluster_modulemap.to_csv(self.output_folder + "enrichment_toppcluster.txt", sep = "\t")
+
         fig = sns.clustermap(df_toppcluster_modulemap, vmin = 0, vmax = 10, 
                                 figsize=(15,15), xticklabels = False, yticklabels = True)
         if draw_plot == True:
-            fig.savefig("toppcluster_map.png")
+            fig.savefig(self.output_folder + "figures/toppcluster_map.png")
 
-        if output_name != None:
-            df_toppcluster_modulemap.to_csv(output_name, sep = "\t")
+        # return df_toppcluster_modulemap
 
-        return df_toppcluster_modulemap
 
     def createJson(self):
         """
-        create json file
+        create json file. It's currently under construction.
         """
         #self.json = json
         return 1
     
+
     def createGCT(self):
         """
         create GCT file
         """
         
         return 1
+
 
 
 def get_all_terms(terms):
