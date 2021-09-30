@@ -1,13 +1,16 @@
 # ToppCell in Python
-ToppCell (https://toppcell.cchmc.org/) is a web portal designed for biologists and bioinformaticians to explore single-cell RNA-seq data swiftly in the era of single cell and high throughput sequencing. Now we enable the visualization function using Python, making it flexible and standalone. It's still improving and your suggestions are really appreciated.
+ToppCell (https://toppcell.cchmc.org/) is a web portal designed for biologists and bioinformaticians to explore single-cell RNA-seq data swiftly in the era of single cell and high throughput sequencing. See [Kang et al. 2021](https://www.sciencedirect.com/science/article/pii/S258900422101083X) for more details. This python version is still in development and your suggestions for improvement are really appreciated. 
 
-### Main function
-- Creation of cell-label-based hierarchical gene modules with most signatures for single-cell data.
-- Automated cell type annotation with transfer learning.
+### Main functions
+- Creation of cell-label-based hierarchical gene modules with most significant signatures for single-cell data.
 - Visualization of gene modules in comprehensive way.
 - Large scale gene enrichment analysis supported by ToppGene.
 - ToppCluster-based comparable gene enrichment analysis.
-- Others...
+
+### Reference
+```
+Jin, Kang, et al. "An Interactive Single Cell Web Portal Identifies Gene and Cell Networks in COVID-19 Host Responses." Iscience (2021): 103115.
+```
 
 ### Installation
 ```python
