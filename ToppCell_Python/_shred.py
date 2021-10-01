@@ -66,7 +66,7 @@ class Shred:
             if not os.path.isdir(output_dir + "/output"):    
                 self.output_folder = output_dir + "/output/"
             else:
-                self.output_folder = outout_dir + "/output_" + str(datetime.datetime.now()) + "/"
+                self.output_folder = output_dir + "/output_" + str(datetime.datetime.now()) + "/"
             os.mkdir(self.output_folder)
             
             if self.save_output:
@@ -244,8 +244,20 @@ class Shred:
 
     def createGCT(self):
         """
-        create GCT file
+        create GCT file based on both heatmap matrix and bin / module metadata
         """
+        try:
+            bin_meta = self.bin_metadata
+            heatmap_matrix = self.heatmap_matrix
+            df_module = self.shred_modules_df_2
+        except:
+            raise Exception("Heatmap generated should be done prior to GCT file generation.")
+        
+        bin_meta = bin_meta.loc[list(heatmap_matrix.columns), :]
+        bin_meta["bin_id"] = bin_meta.index.values
+        df_new_heatmap = pd.DataFrame(data = heatmap_matrix.values,
+                                      index = pd.MultiIndex.from_frame(df_))
+        
         
         return 1
 
