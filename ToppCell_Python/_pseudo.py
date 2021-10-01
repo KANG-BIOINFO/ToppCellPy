@@ -62,6 +62,10 @@ def createBins(adata,
     bin_metadata.index = bin_metadata["bin_id"]
     bin_metadata = bin_metadata[bin_by]
 
+    # add n_cells
+    cell_counts = cell_meta["bin_id"].value_counts()
+    bin_metadata["n_cells"] = cell_counts[list(bin_metadata.index.values)]
+
     # calculate bin matrix
     bin_matrix = pd.DataFrame(columns = adata.var_names, index = np.unique(adata.obs['bin_id']))
     for clust in np.unique(adata.obs['bin_id']): 
@@ -101,6 +105,10 @@ def createSuperbins(adata,
     bin_metadata = cell_meta.groupby(["bin_id"]).head(1) 
     bin_metadata.index = bin_metadata["bin_id"]
     bin_metadata = bin_metadata[bin_by]
+
+    # add n_cells
+    cell_counts = cell_meta["bin_id"].value_counts()
+    bin_metadata["n_cells"] = cell_counts[list(bin_metadata.index.values)]
 
     # calculate bin matrix
     bin_matrix = pd.DataFrame(columns = adata.var_names, index = np.unique(adata.obs['bin_id']))

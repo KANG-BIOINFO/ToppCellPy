@@ -151,20 +151,17 @@ class Shred:
         # return [df_heatmap, df_heatmap_super, df_subsetDEG]
 
 
-    def draw_heatmap(self, output_name = "heatmap.png"):
+    def draw_heatmap(self):
         """
         Draw heatmap based on gene modules generated. Run after create_heatmap_matrix
         """
-        if self.save_output:
-            os.mkdir(self.output_folder + "figures/")
-            output_name = self.output_folder + "figures/" + output_name
-        
         try:
             self.heatmap_matrix
         except AttributeError:
             raise Exception("Heatmap should be created using create_heatmap_matrix prior to drawing it.")
 
-        heatmap(self, output_name, save_output = self.save_output)
+        heatmap(self, bin_type = "bin", save_output = self.save_output)
+        heatmap(self, bin_type = "superbin", save_output = self.save_output)
 
 
     def enrich_modules(self, 
@@ -240,7 +237,7 @@ class Shred:
         df_toppcluster_modulemap.to_csv(self.output_folder + "enrichment_toppcluster.txt", sep = "\t")
 
         fig = sns.clustermap(df_toppcluster_modulemap, vmin = 0, vmax = 10, 
-                                figsize=(15,15), xticklabels = False, yticklabels = True)
+                                figsize=(15,10), xticklabels = False, yticklabels = True, cmap = "bwr")
         if draw_plot == True:
             fig.savefig(self.output_folder + "figures/toppcluster_map.png")
 
@@ -329,14 +326,14 @@ def createGCT_file(shred, type_bin):
     """
     # initialization
     if type_bin == "bin":
-        bin_meta = self.bin_metadata
-        heatmap_matrix = self.heatmap_matrix
+        bin_meta = shred.bin_metadata
+        heatmap_matrix = shred.heatmap_matrix
     elif type_bin == "supbin":
-        bin_meta = self.superbin_metadata
-        heatmap_matrix = self.heatmap_matrix_super
+        bin_meta = shred.superbin_metadata
+        heatmap_matrix = shred.heatmap_matrix_super
     else:
         raise Exception("type should be either bin or superbin")
-    heatmap_matrix = self.heatmap_matrix
+    heatmap_matrix = shred.heatmap_matrix
 
     # format table
     bin_meta = bin_meta.loc[list(heatmap_matrix.columns), :]
@@ -350,7 +347,7 @@ def createGCT_file(shred, type_bin):
                                     columns = pd.MultiIndex.from_frame(bin_meta))
 
     gct_output_name = "heatmap_matrix_GCT.txt" if type_bin == "bin" else "heatmap_matrix_superbin_GCT.txt"
-    df_new_heatmap.to_csv(self.output_folder + gct_output_name, sep = "\t")
+    df_new_heatmap.to_csv(shred.output_folder + gct_output_name, sep = "\t")
     
     # reformat the table into GCT3 type.
     second_line = str(heatmap_matrix.shape[0]) + "\t" + str(heat_matrix.shape[1]) + "\t" + str(df_module.shape[1]-1) + "\t" + str(bin_meta.shape[1]-1) + "\n"
@@ -361,9 +358,9 @@ def createGCT_file(shred, type_bin):
             third_row += (col + "\t")
         else:
             third_row += (col + "\n")
-    with open(self.output_folder + gct_output_name, "r") as f:
+    with open(shred.output_folder + gct_output_name, "r") as f:
         lines = f.readlines()
-    with open(self.output_folder + gct_output_name, "w") as f:
+    with open(shred.output_folder + gct_output_name, "w") as f:
         f.write("#1.3\n")
         f.write(second_line)
         f.write(third_line)
