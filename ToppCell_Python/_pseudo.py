@@ -11,7 +11,7 @@ def createBins(adata,
                 percentile = 75,
                 use_raw = False):
     """
-    Create pseudo-bulk bins for original data.---
+    Create pseudo-bulk bins for original data.
     """
     # get cell meta-data
     if "n_counts" not in adata.obs.columns:
@@ -71,11 +71,44 @@ def createBins(adata,
     return [bin_metadata, bin_matrix]
 
 
-def createSuperbins(a):
+def createSuperbins(adata,
+                    bin_by,
+                    method = ["mean", "median", "percentile"], 
+                    percentile = 75,
+                    use_raw = False):
     """
-    Create superbin
+    Create super pesudo-bulk bins for original data. Each group (partition) of cell will be compressed to one bin. 
     """
-    return 0
+
+    # get cell meta-data
+    if "n_counts" not in adata.obs.columns:
+        sc.pp.filter_cells(adata, min_counts = 0)
+        sc.pp.filter_cells(adata, min_genes = 0)
+
+    cell_meta = adata.obs
+
+    # create bin groups
+    cell_meta["bin_id"] = ""
+    for i in bin_by:
+        if i not in cell_meta.columns:
+            raise Exception(i + " is not a valid cell annotation in anndata.")
+        else:
+            cell_meta["bin_id"] = [cell_meta["bin_id"][j] + "-" + cell_meta[i][j] for j in range(cell_meta.shape[0])]
+    cell_meta["bin_id"] = [i.lstrip("-") for i in cell_meta["bin_id"]]
+    adata.obs = cell_meta
+
+    # create metadata for bin_id (information in bin_by group)
+    bin_metadata = cell_meta.groupby(["bin_id"]).head(1) 
+    bin_metadata.index = bin_metadata["bin_id"]
+    bin_metadata = bin_metadata[bin_by]
+
+    # calculate bin matrix
+    bin_matrix = pd.DataFrame(columns = adata.var_names, index = np.unique(adata.obs['bin_id']))
+    for clust in np.unique(adata.obs['bin_id']): 
+        bin_matrix.loc[clust] = adata[adata.obs['bin_id'].isin([clust]),:].X.mean(0)
+    bin_matrix = bin_matrix.T
+
+    return [bin_metadata, bin_matrix]
 
 
 def get_chunk_id(a):

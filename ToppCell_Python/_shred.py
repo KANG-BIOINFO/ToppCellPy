@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from ._differential import compute_levelWise_differential_analysis
-from ._pseudo import createBins
+from ._pseudo import createBins, createSuperbins
 from ._visualize import heatmap
 from ._enrich import module_enrich_ranked, module_enrich, apply_toppcluster
 
@@ -61,6 +61,7 @@ class Shred:
         # create bins for heatmap visualization
         self.bin_metadata, self.bin_matrix = createBins(adata, bin_by = bin_group, 
                                                         min_cells = bin_min_cells, target_totalBins = bin_num)
+        self.superbin_metadata, self.superbin_matrix = createSuperbins(adata, bin_by = bin_group)
         
         if output_dir != None:
             if not os.path.isdir(output_dir + "/output"):    
@@ -72,6 +73,8 @@ class Shred:
             if self.save_output:
                 self.bin_metadata.to_csv(self.output_folder + "bin_metadata.txt", sep = "\t")
                 self.bin_matrix.to_csv(self.output_folder + "bin_matrix.txt", sep = "\t")
+                self.superbin_metadata.to_csv(self.output_folder + "superbin_metadata.txt", sep = "\t")
+                self.superbin_matrix.to_csv(self.output_folder + "superbin_matrix.txt", sep = "\t")
 
 
     def do_shredplan(self):
@@ -111,10 +114,14 @@ class Shred:
 
         df_bin_meta = self.bin_metadata
         df_bin = self.bin_matrix
+        df_superbin_meta = self.superbin_metadata
+        df_superbin = self.superbin_matrix
         
         # get bin table
         df_bin_meta = df_bin_meta.sort_values(self.bin_group)
         df_bin = df_bin[list(df_bin_meta.index.values)]
+        df_superbin_meta = df_superbin_meta.sort_values(self.bin_group)
+        df_superbin = df_superbin[list(df_superbin_meta.index.values)]
 
         # get organized gene modules ready
         try:
@@ -128,14 +135,20 @@ class Shred:
         # create heatmap
         df_heatmap = df_bin.loc[list(df_subsetDEG.index.values),:]
         df_heatmap = df_heatmap.astype(float)
+        
+        df_heatmap_super = df_superbin.loc[list(df_subsetDEG.index.values),:]
+        df_heatmap_super = df_heatmap_super.astype(float)
+
         self.heatmap_matrix = df_heatmap
+        self.heatmap_matrix_super = df_heatmap_super
         self.shred_modules_df_2 = df_subsetDEG
 
         if self.save_output:
             self.heatmap_matrix.to_csv(self.output_folder + "heatmap_matrix.txt", sep = "\t")
+            self.heatmap_matrix_super.to_csv(self.output_folder + "heatmap_matrix_superbin.txt", sep = "\t")
             self.shred_modules_df_2.to_csv(self.output_folder + "genemodules_heatmap.txt", sep = "\t")
 
-        # return [df_heatmap, df_subsetDEG]
+        # return [df_heatmap, df_heatmap_super, df_subsetDEG]
 
 
     def draw_heatmap(self, output_name = "heatmap.png"):
@@ -253,20 +266,81 @@ class Shred:
         except:
             raise Exception("Heatmap generated should be done prior to GCT file generation.")
         
+        # format table
         bin_meta = bin_meta.loc[list(heatmap_matrix.columns), :]
         bin_meta["bin_id"] = bin_meta.index.values
+
+        df_module.reset_index(level = 0, inplace = True)
+        df_module.rename({"names": "Genes"}, axis = 1, inplace = True)
+
         df_new_heatmap = pd.DataFrame(data = heatmap_matrix.values,
-                                      index = pd.MultiIndex.from_frame(df_))
+                                      index = pd.MultiIndex.from_frame(df_module),
+                                      columns = pd.MultiIndex.from_frame(bin_meta))
+        df_new_heatmap.to_csv(self.output_folder + "heatmap_matrix_GCT.txt", sep = "\t")
         
+        # reformat the table into GCT3 type.
+        second_line = str(heatmap_matrix.shape[0]) + "\t" + str(heat_matrix.shape[1]) + "\t" + str(df_module.shape[1]-1) + "\t" + str(bin_meta.shape[1]-1) + "\n"
         
-        return 1
+        third_row = ""
+        for i, col in enumerate(df_module.columns):
+            if i != (df_module.shape[1] - 1):
+                third_row += (col + "\t")
+            else:
+                third_row += (col + "\n")
+
+        with open(self.output_folder + "heatmap_matrix_GCT.txt", "r") as f:
+            lines = f.readlines()
+        with open(self.output_folder + "heatmap_matrix_GCT.txt", "w") as f:
+            f.write("#1.3\n")
+            f.write(second_line)
+            f.write(third_line)
+            for line in lines:
+                if not line.startswith("Genes"):
+                    f.write(line)
 
     
-    def toppcell_batchRun(self):
+    def toppcell_batchRun(self, 
+                          top_n_genes = 200, 
+                          heatmap_output_name = "heatmap.png",
+                          enrich_categories = ["GeneOntologyMolecularFunction", 
+                                                "GeneOntologyBiologicalProcess", 
+                                                "GeneOntologyCellularComponent", 
+                                                "Pathway", 
+                                                "MousePheno"],
+                          enrich_ranked = False,
+                          toppcluster_run = True,
+                          toppcluster_drawplot = True,
+                          createGCT = True):
+        """
+        Run the whole pipeline in one code. Gene modules, heatmap and ToppCluster map can be generated in one run.
+
+        Parameters
+        ----------
+        top_n_genes
+                Number of genes selected for gene module generation.
+        heatmap_output_name
+                Output name of the heatmap.
+        enrich_categories
+                Categories used for enrichment.
+        enrich_ranked
+                Whether use pre-ranked enrichment or not. Default is False. 
+        toppcluster_run
+                Whether generate toppcluster map or not. Default is True.
+        toppcluster_drawplot
+                Whether draw toppcluster map or not. Default is True.
+        createGCT
+                Whether create GCT. Default is True
         """
 
-        """
-        return 1
+        self.do_shredplan()
+        self.create_heatmap_matrix(top_n_genes = top_n_genes)
+        self.draw_heatmap(heatmap_output_name)
+        self.enrich_modules(categories = enrich_categories, ranked = enrich_ranked)
+        
+        if toppcluster_run:
+            self.toppcluster(draw_plot = toppcluster_draw_plot)
+        if createGCT:
+            self.createGCT()
 
 
 def get_all_terms(terms):
