@@ -31,7 +31,10 @@ shred.create_heatmap_matrix()
 shred.draw_heatmap()
 
 # do enrichment for all modules
-shred.enrich_modules(categories = ["GeneOntologyCellularComponent"])
+# shred.enrich_modules(categories = ["GeneOntologyCellularComponent"])
 
 # draw toppcluster plot
-shred.toppcluster()
+# shred.toppcluster()
+
+# create GCT files
+shred.createGCT()

@@ -257,46 +257,17 @@ class Shred:
 
     def createGCT(self):
         """
-        create GCT file based on both heatmap matrix and bin / module metadata
+        create GCT files based on both (super) heatmap matrix and bin / module metadata.
         """
         try:
-            bin_meta = self.bin_metadata
-            heatmap_matrix = self.heatmap_matrix
-            df_module = self.shred_modules_df_2
+            self.bin_metadata
+            self.shred_modules_df_2
+            self.heatmap_matrix
         except:
             raise Exception("Heatmap generated should be done prior to GCT file generation.")
-        
-        # format table
-        bin_meta = bin_meta.loc[list(heatmap_matrix.columns), :]
-        bin_meta["bin_id"] = bin_meta.index.values
 
-        df_module.reset_index(level = 0, inplace = True)
-        df_module.rename({"names": "Genes"}, axis = 1, inplace = True)
-
-        df_new_heatmap = pd.DataFrame(data = heatmap_matrix.values,
-                                      index = pd.MultiIndex.from_frame(df_module),
-                                      columns = pd.MultiIndex.from_frame(bin_meta))
-        df_new_heatmap.to_csv(self.output_folder + "heatmap_matrix_GCT.txt", sep = "\t")
-        
-        # reformat the table into GCT3 type.
-        second_line = str(heatmap_matrix.shape[0]) + "\t" + str(heat_matrix.shape[1]) + "\t" + str(df_module.shape[1]-1) + "\t" + str(bin_meta.shape[1]-1) + "\n"
-        
-        third_row = ""
-        for i, col in enumerate(df_module.columns):
-            if i != (df_module.shape[1] - 1):
-                third_row += (col + "\t")
-            else:
-                third_row += (col + "\n")
-
-        with open(self.output_folder + "heatmap_matrix_GCT.txt", "r") as f:
-            lines = f.readlines()
-        with open(self.output_folder + "heatmap_matrix_GCT.txt", "w") as f:
-            f.write("#1.3\n")
-            f.write(second_line)
-            f.write(third_line)
-            for line in lines:
-                if not line.startswith("Genes"):
-                    f.write(line)
+        for bin_input in ["bin", "superbin"]:
+            createGCT_file(self, bin_input)
 
     
     def toppcell_batchRun(self, 
@@ -350,3 +321,52 @@ def get_all_terms(terms):
             all_terms.append(term)
         else:
             all_terms += term.split("+")
+
+
+def createGCT_file(shred, type_bin):
+    """
+    create GCT file based on both heatmap matrix and bin / module metadata
+    """
+    # initialization
+    if type_bin == "bin":
+        bin_meta = self.bin_metadata
+        heatmap_matrix = self.heatmap_matrix
+    elif type_bin == "supbin":
+        bin_meta = self.superbin_metadata
+        heatmap_matrix = self.heatmap_matrix_super
+    else:
+        raise Exception("type should be either bin or superbin")
+    heatmap_matrix = self.heatmap_matrix
+
+    # format table
+    bin_meta = bin_meta.loc[list(heatmap_matrix.columns), :]
+    bin_meta["bin_id"] = bin_meta.index.values
+
+    df_module.reset_index(level = 0, inplace = True)
+    df_module.rename({"names": "Genes"}, axis = 1, inplace = True)
+
+    df_new_heatmap = pd.DataFrame(data = heatmap_matrix.values,
+                                    index = pd.MultiIndex.from_frame(df_module),
+                                    columns = pd.MultiIndex.from_frame(bin_meta))
+
+    gct_output_name = "heatmap_matrix_GCT.txt" if type_bin == "bin" else "heatmap_matrix_superbin_GCT.txt"
+    df_new_heatmap.to_csv(self.output_folder + gct_output_name, sep = "\t")
+    
+    # reformat the table into GCT3 type.
+    second_line = str(heatmap_matrix.shape[0]) + "\t" + str(heat_matrix.shape[1]) + "\t" + str(df_module.shape[1]-1) + "\t" + str(bin_meta.shape[1]-1) + "\n"
+    
+    third_row = ""
+    for i, col in enumerate(df_module.columns):
+        if i != (df_module.shape[1] - 1):
+            third_row += (col + "\t")
+        else:
+            third_row += (col + "\n")
+    with open(self.output_folder + gct_output_name, "r") as f:
+        lines = f.readlines()
+    with open(self.output_folder + gct_output_name, "w") as f:
+        f.write("#1.3\n")
+        f.write(second_line)
+        f.write(third_line)
+        for line in lines:
+            if not line.startswith("Genes"):
+                f.write(line)
