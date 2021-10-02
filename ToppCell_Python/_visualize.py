@@ -51,13 +51,14 @@ def heatmap(shred, bin_type, save_output = True):
     """
     Draw the heatmap for gene modules
     """
-    # format dataframes
-    df_heatmap = shred.heatmap_matrix.copy() # load heatmap matrix
+    # format dataframes 
     df_subsetDEG = shred.shred_modules_df_2.copy() # load the gene module annotation dataframe
 
     if bin_type == "bin":
+        df_heatmap = shred.heatmap_matrix.copy() # load heatmap matrix
         df_bin_meta = shred.bin_metadata.loc[df_heatmap.columns, :].copy() # order the bin metadata
     elif bin_type == "superbin":
+        df_heatmap = shred.heatmap_matrix_super.copy()
         df_bin_meta = shred.superbin_metadata.loc[df_heatmap.columns, :].copy() # order the bin metadata
     else:
         raise Exception("bin_type should be either bin or superbin.")
@@ -68,31 +69,57 @@ def heatmap(shred, bin_type, save_output = True):
 
     # initialize
     fig = plt.figure(figsize = (15, 15))
-    gs = GridSpec(nrows = 3, ncols = 3, height_ratios=(0.10,0.05, 0.85), width_ratios = (0.85,0.05,0.10))
+    gs = GridSpec(nrows = 3, ncols = 4, height_ratios=(0.10,0.05, 0.85), width_ratios = (0.70, 0.04, 0.07, 0.19))
     gs.update(wspace = 0.025, hspace = 0.025)
 
-    # bin metadata barplot
+    #####----- bin metadata barplot ------#####
     ax0 = fig.add_subplot(gs[0,0])
-    columns = df_bin_meta.columns
+    columns = []
+    labels_for_legend = [] #initialize for legends
+    colors_for_legend = []
+    for column in df_bin_meta.columns:
+        if column != "n_cells":
+            columns.append(column)
+            df_size = pd.DataFrame(df_bin_meta.groupby(columns).size())
+            df_size.rename({0: "n_cells"}, axis = 1, inplace = True)
+            labels = [i[-1] if type(i) == tuple else i for i in df_size.index.values]
+            labels_for_legend += labels
+            
+            color_dict = dict(zip(labels, cycler_colors[:df_size.shape[0]])) # avoid different colors for duplicate keys
+            count_aggregrated = 0
+            for idx, label in enumerate(labels):
+                count = df_size.iloc[idx, 0]
+                ax0.barh(y = column, width = count, height = 1, left = count_aggregrated, color = color_dict[label])
+                ax0.set_xticklabels("")
+                ax0.set_xticks([])
+                count_aggregrated += count
 
-    for column in columns:
-        count_aggregrated = 0
-        labels = np.unique(df_bin_meta[column])
-        label_counts = dict(df_bin_meta[column].value_counts())
-        for label in labels:
-            count = label_counts[label]
-            ax0.barh(y = column, width = count, height = 1, left = count_aggregrated)
-            ax0.set_xticklabels("")
-            ax0.set_xticks([])
-            count_aggregrated += count
-    # ax0.set_yticklabels(columns, rotation = 45)
+    # legend initialization
+    colors = [matplotlib.colors.rgb2hex(ax0.patches[i].get_facecolor()) for i in range(len(ax0.patches))]
+    handles = [plt.Rectangle((0,0),1,1, color = i) for i in colors]
+    labels_unique = []
+    handles_unique = []
+
+    # remove duplicates
+    for k in range(len(labels_for_legend)):
+        if not labels_for_legend[k] in labels_unique:
+            labels_unique.append(labels_for_legend[k])
+            handles_unique.append(handles[k])
+
+    ax0_1eg = fig.add_subplot(gs[0,3])
+    leg1 = ax0_1eg.legend(handles_unique, labels_unique, prop = {'size': 10}, 
+                          loc = 'upper left', title = "bin_metadata", ncol = 5)
+    ax0_1eg.add_artist(leg1)
+    ax0_1eg.axis('off')
+
+    # other formats
     ax0.set_xlim(0, n_bins)
     ax0.spines['left'].set_visible(False)
     ax0.spines['right'].set_visible(False) 
     ax0.spines['top'].set_visible(False) 
     ax0.spines['bottom'].set_visible(False) 
 
-    # n_cell histograms
+    #####----- n_cell histograms ------#####
     counts = df_bin_meta["n_cells"]
     ax1 = fig.add_subplot(gs[1,0])
     ax1.bar(x = list(range(n_bins)), height = counts, width = 1)
@@ -101,13 +128,15 @@ def heatmap(shred, bin_type, save_output = True):
     ax1.set_xlim(0, n_bins)
     ax1.set_ylabel("n_cells", rotation = 0, labelpad = 24)
 
-    # gene module barplots
+    #####----- gene module barplots ------#####
     ax2 = fig.add_subplot(gs[2,2])
     columns = ["Status", "reference_group","shred_plan"]
+    labels_for_legend = []
 
     for column in columns:
         count_aggregrated = 0
         labels = np.unique(df_subsetDEG[column])
+        labels_for_legend += list(labels)
         label_counts = dict(df_subsetDEG[column].value_counts())
         for label in labels:
             count = label_counts[label]
@@ -122,7 +151,30 @@ def heatmap(shred, bin_type, save_output = True):
     ax2.spines['top'].set_visible(False) 
     ax2.spines['bottom'].set_visible(False) 
 
-    # gene module score histogram
+    # set legend
+    n_Status = len(np.unique(df_subsetDEG["Status"]))
+    n_reference_groups = len(np.unique(df_subsetDEG["reference_group"]))
+
+    colors = [matplotlib.colors.rgb2hex(ax2.patches[i].get_facecolor()) for i in range(len(ax2.patches))]
+    handles = [plt.Rectangle((0,0),1,1, color = i) for i in colors]
+    # legend for status
+    ax2_leg1 = fig.add_subplot(gs[2,3])
+    leg1 = ax2_leg1.legend(handles[:n_Status], labels_for_legend[:n_Status], 
+                            prop = {'size': 10}, loc = 'upper left', title = "Status", ncol=4)
+    ax2_leg1.add_artist(leg1)
+    # legend for others (reference and shred_plan)
+    ax2_leg2 = fig.add_subplot(gs[2,3])
+    leg2 = ax2_leg2.legend(handles[n_Status:(n_Status + n_reference_groups)], labels_for_legend[n_Status:(n_Status + n_reference_groups)], 
+                            prop = {'size': 10}, loc = 'center left',title = "reference group")
+    leg3 = ax2_leg2.legend(handles[n_Status:(n_Status + n_reference_groups):], labels_for_legend[n_Status:(n_Status + n_reference_groups):], 
+                            prop = {'size': 10}, loc = 'lower left',title = "shred plan")
+    ax2_leg2.add_artist(leg2)
+    ax2_leg2.add_artist(leg3)
+
+    ax2_leg1.axis('off')
+    ax2_leg2.axis('off')
+
+    #####----- gene module score histogram ------##### 
     ax3 = fig.add_subplot(gs[2,1])
     ax3.barh(y = list(range(n_genes)), width = list(df_subsetDEG["logfoldchanges"]), height = 1)
     ax3.xaxis.tick_top()
@@ -132,14 +184,14 @@ def heatmap(shred, bin_type, save_output = True):
     ax3.set_xlabel("logFC", rotation = 35, ha = "right")
     ax3.plot([1, 1], [0, 5200], color = "#990000", linestyle = "dashed", lw = 0.8)
 
-    # heatmap itself
+    #####----- main heatmap ------#####
     ax5 = fig.add_subplot(gs[2,0])
     sns.heatmap(df_heatmap, vmin = 0, vmax = 10, yticklabels=False, xticklabels=False, cmap = "bwr", ax = ax5, cbar = False)
     ax5.set_ylabel("")
 
     output_name = (shred.output_folder + "/figures/heatmap.png") if bin_type == "bin" else (shred.output_folder + "/figures/heatmap_superbin.png")
     if save_output:
-        fig.savefig(output_name)
+        fig.savefig(output_name, bbox_inches = "tight")
 
 
 def correlation_bins(shred):

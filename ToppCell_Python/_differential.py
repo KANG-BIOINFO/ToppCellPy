@@ -17,7 +17,7 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name)
     plan_name
             name of shred plan
     """
-    adata = shred.adata
+    adata = shred.adata.copy()
     cell_meta = adata.obs
 
     # create a new column for target and reference

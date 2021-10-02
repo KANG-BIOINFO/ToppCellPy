@@ -67,7 +67,7 @@ def apply_toppcluster(shred):
     """
     Apply ToppCluster enrichment across gene modules.
     """
-    df_module_enrichment = shred.df_module_enrichment
+    df_module_enrichment = shred.df_module_enrichment.copy()
     df_module_enrichment["enrichment score"] = [-np.log10(i + THETA_LOWER_BORDER) for i in df_module_enrichment["Adjusted P-value"]]
     
     all_enriched_terms = np.unique(df_module_enrichment["Term"])

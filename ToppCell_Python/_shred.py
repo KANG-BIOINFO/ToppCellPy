@@ -125,7 +125,7 @@ class Shred:
 
         # get organized gene modules ready
         try:
-            df_DEG = self.shred_modules_df
+            df_DEG = self.shred_modules_df.copy()
         except AttributeError:
             raise Exception("Level-wise comparison should be done first using do_shredplan prior to creating heatmap.")
 
@@ -159,6 +159,9 @@ class Shred:
             self.heatmap_matrix
         except AttributeError:
             raise Exception("Heatmap should be created using create_heatmap_matrix prior to drawing it.")
+        
+        if self.save_output:
+            os.mkdir(self.output_folder + "figures")
 
         heatmap(self, bin_type = "bin", save_output = self.save_output)
         heatmap(self, bin_type = "superbin", save_output = self.save_output)
@@ -186,7 +189,7 @@ class Shred:
                 For more information, please check package gseapy (https://gseapy.readthedocs.io/en/latest/introduction.html).
         """
         try:
-            df_subsetDEG = self.shred_modules_df_2 
+            df_subsetDEG = self.shred_modules_df_2.copy()
         except AttributeError:
             raise Exception("Gene modules should be generated using create_heatmap_matrix prior to gene module enrichment.")
         self.enrich_ranked = ranked
@@ -239,7 +242,7 @@ class Shred:
         fig = sns.clustermap(df_toppcluster_modulemap, vmin = 0, vmax = 10, 
                                 figsize=(15,10), xticklabels = False, yticklabels = True, cmap = "bwr")
         if draw_plot == True:
-            fig.savefig(self.output_folder + "figures/toppcluster_map.png")
+            fig.savefig(self.output_folder + "figures/toppcluster_map.png", bbox_inches = "tight")
 
         # return df_toppcluster_modulemap
 
@@ -326,14 +329,15 @@ def createGCT_file(shred, type_bin):
     """
     # initialization
     if type_bin == "bin":
-        bin_meta = shred.bin_metadata
-        heatmap_matrix = shred.heatmap_matrix
+        bin_meta = shred.bin_metadata.copy()
+        heatmap_matrix = shred.heatmap_matrix.copy()
     elif type_bin == "supbin":
-        bin_meta = shred.superbin_metadata
-        heatmap_matrix = shred.heatmap_matrix_super
+        bin_meta = shred.superbin_metadata.copy()
+        heatmap_matrix = shred.heatmap_matrix_super.copy()
     else:
         raise Exception("type should be either bin or superbin")
-    heatmap_matrix = shred.heatmap_matrix
+    heatmap_matrix = shred.heatmap_matrix.copy()
+    df_module = shred.shred_modules_df_2.copy()
 
     # format table
     bin_meta = bin_meta.loc[list(heatmap_matrix.columns), :]
