@@ -354,14 +354,14 @@ def createGCT_file(shred, type_bin):
     df_new_heatmap.to_csv(shred.output_folder + gct_output_name, sep = "\t")
     
     # reformat the table into GCT3 type.
-    second_line = str(heatmap_matrix.shape[0]) + "\t" + str(heat_matrix.shape[1]) + "\t" + str(df_module.shape[1]-1) + "\t" + str(bin_meta.shape[1]-1) + "\n"
+    second_line = str(heatmap_matrix.shape[0]) + "\t" + str(heatmap_matrix.shape[1]) + "\t" + str(df_module.shape[1]-1) + "\t" + str(bin_meta.shape[1]-1) + "\n"
     
-    third_row = ""
+    third_line = ""
     for i, col in enumerate(df_module.columns):
         if i != (df_module.shape[1] - 1):
-            third_row += (col + "\t")
+            third_line += (col + "\t")
         else:
-            third_row += (col + "\n")
+            third_line += (col + "\n")
     with open(shred.output_folder + gct_output_name, "r") as f:
         lines = f.readlines()
     with open(shred.output_folder + gct_output_name, "w") as f:

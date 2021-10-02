@@ -108,7 +108,8 @@ def heatmap(shred, bin_type, save_output = True):
 
     ax0_1eg = fig.add_subplot(gs[0,3])
     leg1 = ax0_1eg.legend(handles_unique, labels_unique, prop = {'size': 10}, 
-                          loc = 'upper left', title = "bin_metadata", ncol = 5)
+                          loc = 'upper left', title = "bin metadata", ncol = 5)
+    leg1._legend_box.aligh = "left"
     ax0_1eg.add_artist(leg1)
     ax0_1eg.axis('off')
 
@@ -161,13 +162,16 @@ def heatmap(shred, bin_type, save_output = True):
     ax2_leg1 = fig.add_subplot(gs[2,3])
     leg1 = ax2_leg1.legend(handles[:n_Status], labels_for_legend[:n_Status], 
                             prop = {'size': 10}, loc = 'upper left', title = "Status", ncol=4)
+    leg1._legend_box.aligh = "left"
     ax2_leg1.add_artist(leg1)
     # legend for others (reference and shred_plan)
     ax2_leg2 = fig.add_subplot(gs[2,3])
     leg2 = ax2_leg2.legend(handles[n_Status:(n_Status + n_reference_groups)], labels_for_legend[n_Status:(n_Status + n_reference_groups)], 
                             prop = {'size': 10}, loc = 'center left',title = "reference group")
-    leg3 = ax2_leg2.legend(handles[n_Status:(n_Status + n_reference_groups):], labels_for_legend[n_Status:(n_Status + n_reference_groups):], 
+    leg3 = ax2_leg2.legend(handles[(n_Status + n_reference_groups):], labels_for_legend[(n_Status + n_reference_groups):], 
                             prop = {'size': 10}, loc = 'lower left',title = "shred plan")
+    leg2._legend_box.aligh = "left"
+    leg3._legend_box.aligh = "left"
     ax2_leg2.add_artist(leg2)
     ax2_leg2.add_artist(leg3)
 
