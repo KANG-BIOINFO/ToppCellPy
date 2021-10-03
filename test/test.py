@@ -21,6 +21,9 @@ shred = tp.Shred(adata = adata,
             method = "wilcoxon",
             output_dir = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/")
 
+shred.toppcell_batchRun(enrich_categories = ["GeneOntologyCellularComponent"])
+
+'''
 # run levelwise DE analysis and generate gene modules
 shred.do_shredplan()
 
@@ -38,3 +41,4 @@ shred.toppcluster()
 
 # create GCT files
 shred.createGCT()
+'''
