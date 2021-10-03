@@ -65,8 +65,10 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name)
     return df_deg
 
 
-
 def format_DEGs(adata):
+    """
+    Format the output from anndata
+    """
     keys = ["names","scores","logfoldchanges","pvals","pvals_adj","pts","pts_rest"]
     for i,key in enumerate(keys):
         a = pd.DataFrame(adata.uns["rank_genes_groups"][key]) # transfer to data frame

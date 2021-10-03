@@ -13,6 +13,10 @@ def module_enrich_ranked(ranked_gene_table,
                                 "MousePheno",
                                 "Pathway"],
                     min_size = 1, max_size = 1500):
+    """
+    Enrichment for ranked gene list.
+    """
+
     # load all reference gene sets (dictionaries)
     loc = "/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/" if path.isdir("/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/") else "/Users/kang/Dropbox/Code/data/ToppGene_Data/"
     enrich_all_dicts = {}
@@ -41,6 +45,10 @@ def module_enrich(gene_table,
                                 "GeneOntologyCellularComponent",
                                 "MousePheno",
                                 "Pathway"]):
+    """
+    Enrichment for gene list.
+    """
+
     # load all reference gene sets (dictionaries)
     loc = "/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/" if path.isdir("/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/") else "/Users/kang/Dropbox/Code/data/ToppGene_Data/"
     enrich_all_dicts = {}

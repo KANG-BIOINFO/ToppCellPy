@@ -5,7 +5,7 @@ import sys
 import pickle
 
 sys.path.insert(1, '/Users/jinmr2/Dropbox/Code/ToppCell-Python/')
-import ToppCell_Python as tp
+import ToppCellPy as tp
 import time 
 
 path = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/"
@@ -21,9 +21,9 @@ shred = tp.Shred(adata = adata,
             method = "wilcoxon",
             output_dir = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/")
 
-shred.toppcell_batchRun(enrich_categories = ["GeneOntologyCellularComponent"])
+# run everything once.
+# shred.toppcell_batchRun(enrich_categories = ["GeneOntologyCellularComponent"])
 
-'''
 # run levelwise DE analysis and generate gene modules
 shred.do_shredplan()
 
@@ -41,4 +41,3 @@ shred.toppcluster()
 
 # create GCT files
 shred.createGCT()
-'''

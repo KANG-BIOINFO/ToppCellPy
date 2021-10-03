@@ -48,7 +48,7 @@ shred.do_shredplan()
 Create heatmap data frame and draw heatmap
 ```python
 shred.create_heatmap_matrix()
-shred.draw_heatmap("heatmap.png")
+shred.draw_heatmap()
 ```
 
 Do enrichment for all modules
