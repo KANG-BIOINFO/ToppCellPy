@@ -14,8 +14,8 @@ Jin, Kang, et al. "An Interactive Single Cell Web Portal Identifies Gene and Cel
 
 ### Installation
 ```python
-git clone https://github.com/KANG-BIOINFO/ToppCell_Python.git
-cd ToppCell_Python
+git clone https://github.com/KANG-BIOINFO/ToppCellPy.git
+cd ToppCellPy
 pip install .
 ```
 
@@ -26,7 +26,7 @@ pip install .
 ```python
 import scanpy as sc
 import numpy as np
-import ToppCell_Python as tp
+import ToppCellPy as tp
 ```
 
 Load example data
@@ -61,4 +61,17 @@ Draw ToppCluster plot
 shred.toppcluster()
 ```
 
-
+An alternative option for running the whole pipeline above is using the one-stop code below:
+```python
+shred = tp.Shred(adata = adata,
+            shred_plan = ["stim", "cell", "stim+cell|stim"],
+            bin_group = ["stim", "cell"],
+            order_bins = None,
+            order_modules = None,
+            method = "wilcoxon")
+shred.toppcell_batchRun(top_n_genes = 200,
+                        enrich_categories = ["GeneOntologyCellularComponent"],
+                        enrich_ranked = False,
+                        toppcluster_run = True,
+                        createGCT = True)
+```
