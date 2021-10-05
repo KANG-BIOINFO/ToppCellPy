@@ -3,6 +3,8 @@ import numpy as np
 import pickle 
 import os 
 
+# transfer tables from ToppGene to dictionary pickles.
+# data sources: https://toppgene.cchmc.org/data/
 path = "/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/"
 files = [i for i in os.listdir(path) if i.endswith(".txt")]
 for enrich_file in files:
