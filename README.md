@@ -20,7 +20,7 @@ pip install .
 ```
 
 ### Tutorial
-- [Example on COVID-19 data]()
+- [Example on COVID-19 data](https://nbviewer.jupyter.org/github/KANG-BIOINFO/ToppCellPy/blob/main/test/COVID-19%20example.ipynb)
 - [Example on IFN-stimulated PBMC data](https://nbviewer.jupyter.org/github/KANG-BIOINFO/ToppCellPy/blob/main/test/IFN-stimulated%20PBMC%20example.ipynb)
 
 ### Quick Start
