@@ -18,5 +18,4 @@ setup(
         "gseapy",
         "scipy",
     ],
-    data_files = [('', ["data/ToppGene_ref/*.pl"])]
 )

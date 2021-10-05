@@ -3,8 +3,10 @@ import numpy as np
 import gseapy as gp 
 import pickle
 from os import path
+import pkg_resources
 
 THETA_LOWER_BORDER = 1e-200
+DATA_PATH = pkg_resources.resource_filename('ToppCellPy', '').rstrip("ToppCellPy") + "data/ToppGene_ref/"
 
 def module_enrich_ranked(ranked_gene_table, 
                     terms = ["GeneOntologyMolecularFunction",
@@ -18,10 +20,9 @@ def module_enrich_ranked(ranked_gene_table,
     """
 
     # load all reference gene sets (dictionaries)
-    loc = "/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/" if path.isdir("/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/") else "/Users/kang/Dropbox/Code/data/ToppGene_Data/"
     enrich_all_dicts = {}
     for term in terms:
-        with open (loc + term + ".pl", "rb") as f:
+        with open (DATA_PATH + term + ".pl", "rb") as f:
             enrich_dict = pickle.load(f)
         enrich_all_dicts[term] = enrich_dict
 
@@ -50,10 +51,9 @@ def module_enrich(gene_table,
     """
 
     # load all reference gene sets (dictionaries)
-    loc = "/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/" if path.isdir("/Users/jinmr2/Dropbox/Code/data/ToppGene_Data/") else "/Users/kang/Dropbox/Code/data/ToppGene_Data/"
     enrich_all_dicts = {}
     for term in terms:
-        with open (loc + term + ".pl", "rb") as f:
+        with open (DATA_PATH + term + ".pl", "rb") as f:
             enrich_dict = pickle.load(f)
         enrich_all_dicts[term] = enrich_dict
 
@@ -91,8 +91,11 @@ def apply_toppcluster(shred):
 
     return df_toppcluster_neglog10pval
     
-        
+def test_load_data():
+    for term in ["GeneOntologyMolecularFunction"]:
+        with open (DATA_PATH + term + ".pl", "rb") as f:
+            enrich_dict = pickle.load(f)
+            print(enrich_dict)
 
-    
 
     
