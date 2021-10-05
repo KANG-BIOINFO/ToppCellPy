@@ -16,7 +16,6 @@ setup(
         "matplotlib",
         "seaborn",
         "gseapy",
-        "pickle",
         "scipy",
         "random",
         "pylab"
