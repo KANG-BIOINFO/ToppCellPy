@@ -1,10 +1,7 @@
 import pandas as pd 
 import numpy as np 
 import scanpy as sc
-import sys
 import pickle
-
-sys.path.insert(1, '/Users/jinmr2/Dropbox/Code/ToppCell-Python/')
 import ToppCellPy as tp
 import time 
 
