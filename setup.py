@@ -17,6 +17,5 @@ setup(
         "seaborn",
         "gseapy",
         "scipy",
-        "pylab"
     ]
 )
