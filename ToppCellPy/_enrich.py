@@ -6,7 +6,7 @@ from os import path
 import pkg_resources
 
 THETA_LOWER_BORDER = 1e-200
-DATA_PATH = pkg_resources.resource_filename('ToppCellPy', '').rstrip("ToppCellPy") + "data/ToppGene_ref/"
+DATA_PATH = pkg_resources.resource_filename('ToppCellPy', '') + "/data/ToppGene_ref/"
 
 def module_enrich_ranked(ranked_gene_table, 
                     terms = ["GeneOntologyMolecularFunction",
