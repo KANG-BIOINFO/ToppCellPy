@@ -9,6 +9,7 @@ setup(
     author_email = "Kang.Jin@cchmc.org",
     url = "https://github.com/KANG-BIOINFO/ToppCellPy",
     packages = find_packages(),
+    package_data = {"ToppCellPy": ["data/ToppGene_ref/*"]},
     install_requires = [
         "numpy",
         "pandas",
