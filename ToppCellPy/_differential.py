@@ -22,20 +22,24 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name)
 
     # create a new column for target and reference
     if "+" in target:
-        levels = target.split("+")
-        for idx, level in enumerate(levels):
+        levels_target = target.split("+")
+        for idx, level in enumerate(levels_target):
             if idx == 0:
                 target_value = cell_meta[level]
+                target_value_list = [list(i) for i in cell_meta[level]]
             else:
-                target_value = [(target_value[i] + "-" + cell_meta[level][i]) for i in range(cell_meta.shape[0])]
+                target_value = [(target_value[i] + "-" + cell_meta[level][i]) for i in range(cell_meta.shape[0])] # this is used for status level
+                target_value_list = [target_value_list[i] + [cell_meta[level][i]] for i in range(cell_meta.shape[0])] # this is used for annotations in each level
     else:
+        levels_target = target
         target_value = cell_meta[target]
+        target_value_list = target_value
     cell_meta["target_value"] = target_value
 
     if reference != None:
         if "+" in reference:
-            levels = reference.split("+")
-            for idx, level in enumerate(levels):
+            levels_ref = reference.split("+")
+            for idx, level in enumerate(levels_ref):
                 if idx == 0:
                     reference_value = cell_meta[level]
                 else:
@@ -61,6 +65,9 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name)
             df_deg_sub["reference_group"] = reference_i
             df_deg = pd.concat([df_deg, df_deg_sub], axis = 0)
         df_deg["shred_plan"] = plan_name
+
+    # add target level metadata for each module (decompose status value)
+    df_deg[levels_target] = target_value_list
         
     return df_deg
 
