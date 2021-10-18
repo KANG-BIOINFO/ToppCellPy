@@ -5,9 +5,9 @@ import pickle
 import ToppCellPy as tp
 import time 
 
-path = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/"
+path = "/Users/kang/Dropbox/Code/data/toppcell_test/"
 
-adata = sc.read("/Users/jinmr2/Dropbox/Code/data/batch2_all_normalized_filtered_subset.h5ad")
+adata = sc.read("/Users/kang/Dropbox/Code/data/batch2_all_normalized_filtered_subset.h5ad")
 print(adata)
 # set up shred object and plan
 shred = tp.Shred(adata = adata,
@@ -16,7 +16,7 @@ shred = tp.Shred(adata = adata,
             order_bins = None,
             order_modules = None,
             method = "wilcoxon",
-            output_dir = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/")
+            output_dir = "/Users/kang/Dropbox/Code/data/toppcell_test/")
 
 # run everything once.
 # shred.toppcell_batchRun(enrich_categories = ["GeneOntologyCellularComponent"])

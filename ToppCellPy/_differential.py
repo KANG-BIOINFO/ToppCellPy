@@ -29,7 +29,7 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name,
             if idx == 0:
                 target_value = cell_meta[level]
             else:
-                target_value = [(target_value[i] + "~" + cell_meta[level][i]) for i in range(cell_meta.shape[0])]
+                target_value = [(target_value[i] + module_name_delimiter + cell_meta[level][i]) for i in range(cell_meta.shape[0])]
     else:
         levels_target = target
         target_value = cell_meta[target]
@@ -42,7 +42,7 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name,
                 if idx == 0:
                     reference_value = cell_meta[level]
                 else:
-                    reference_value = [(reference_value[i] + "-" + cell_meta[level][i]) for i in range(cell_meta.shape[0])]
+                    reference_value = [(reference_value[i] + module_name_delimiter + cell_meta[level][i]) for i in range(cell_meta.shape[0])]
         else:
             reference_value = cell_meta[reference]
         cell_meta["reference_value"] = reference_value
@@ -66,8 +66,11 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name,
         df_deg["shred_plan"] = plan_name
 
     # add target level metadata for each module (decompose status value)
-    for idx, level in enumerate(levels_target):
-        df_deg[level] = [i.split(module_name_delimiter)[idx] for i in df_deg["Status"]]
+    if "+" in target:
+        for idx, level in enumerate(levels_target):
+            df_deg[level] = [i.split(module_name_delimiter)[idx] for i in df_deg["Status"]]
+    else:
+        df_deg[levels_target] = df_deg["Status"]
         
     return df_deg
 
