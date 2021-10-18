@@ -7,8 +7,8 @@ import time
 
 path = "/Users/jinmr2/Dropbox/Code/data/toppcell_test/"
 
-adata = sc.read("/Users/jinmr2/Dropbox/Code/data/batch2_all_normalized_filtered.h5ad")
-
+adata = sc.read("/Users/jinmr2/Dropbox/Code/data/batch2_all_normalized_filtered_subset.h5ad")
+print(adata)
 # set up shred object and plan
 shred = tp.Shred(adata = adata,
             shred_plan = ["stim", "cell", "stim+cell|stim"],

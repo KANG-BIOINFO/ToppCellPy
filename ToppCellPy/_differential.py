@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
-def compute_levelWise_differential_analysis(shred, target, reference, plan_name):
+def compute_levelWise_differential_analysis(shred, target, reference, plan_name, module_name_delimiter = "~"):
     """
     Do differential analysis.
 
@@ -16,6 +16,8 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name)
             denominator level for DE analysis, e.g. None (World)
     plan_name
             name of shred plan
+    module_name_delimiter
+            delimiter character in module names. e.g. "COVID-19~Monocyte"
     """
     adata = shred.adata.copy()
     cell_meta = adata.obs
@@ -26,14 +28,11 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name)
         for idx, level in enumerate(levels_target):
             if idx == 0:
                 target_value = cell_meta[level]
-                target_value_list = [list(i) for i in cell_meta[level]]
             else:
-                target_value = [(target_value[i] + "-" + cell_meta[level][i]) for i in range(cell_meta.shape[0])] # this is used for status level
-                target_value_list = [target_value_list[i] + [cell_meta[level][i]] for i in range(cell_meta.shape[0])] # this is used for annotations in each level
+                target_value = [(target_value[i] + "~" + cell_meta[level][i]) for i in range(cell_meta.shape[0])]
     else:
         levels_target = target
         target_value = cell_meta[target]
-        target_value_list = target_value
     cell_meta["target_value"] = target_value
 
     if reference != None:
@@ -67,7 +66,8 @@ def compute_levelWise_differential_analysis(shred, target, reference, plan_name)
         df_deg["shred_plan"] = plan_name
 
     # add target level metadata for each module (decompose status value)
-    df_deg[levels_target] = target_value_list
+    for idx, level in enumerate(levels_target):
+        df_deg[level] = [i.split(module_name_delimiter)[idx] for i in df_deg["Status"]]
         
     return df_deg
 

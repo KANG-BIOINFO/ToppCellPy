@@ -1,9 +1,9 @@
 # ToppCell in Python
-ToppCell (https://toppcell.cchmc.org/) is a web portal designed for biologists and bioinformaticians to explore single-cell RNA-seq data swiftly in the era of single cell and high throughput sequencing. See [Jin et al. 2021](https://www.sciencedirect.com/science/article/pii/S258900422101083X) for more details. This python version is still in development and your suggestions for improvement are really appreciated. 
+ToppCell (https://toppcell.cchmc.org/) is a web portal designed for biologists and bioinformaticians to explore single-cell RNA-seq data swiftly in the era of single cell and high throughput sequencing. The highlight is that it allows users to conduct differential expression analysis for super complicated biological metadata of single-cell analysis. See [Jin et al. 2021](https://www.sciencedirect.com/science/article/pii/S258900422101083X) for more details. This python version is still in development and your suggestions for improvement are really appreciated. 
 
 ### Main functions
-- Creation of cell-label-based hierarchical gene modules with most significant signatures for single-cell data.
-- Visualization of gene modules in comprehensive way.
+- Conduct differential expression analysis for super complicated biological metadata of single-cell analysis
+- Visualization of results (gene modules) in hierarchical and comprehensive way.
 - Large scale gene enrichment analysis supported by ToppGene.
 - ToppCluster-based comparable gene enrichment analysis.
 
@@ -35,14 +35,15 @@ Load example data
 adata = sc.read("batch2_all_normalized_filtered.h5ad")
 ```
 
-Set up shred object run shred plan
+Set up shred object run shred plan. shred_plan indicates how to run differential expression analysis and bin_group indicates how to make bins for heatmap visualization.
 ```python
+# stim and cell are metadata of stimulation and cell type in the anndata
 shred = tp.Shred(adata = adata,
-            shred_plan = ["stim", "cell", "stim+cell|stim"],
-            bin_group = ["stim", "cell"],
-            order_bins = None,
-            order_modules = None,
-            method = "wilcoxon")
+                shred_plan = ["stim", "cell", "stim+cell|stim"],
+                bin_group = ["stim", "cell"],
+                order_bins = None,
+                order_modules = None,
+                method = "wilcoxon")
 shred.do_shredplan()
 ```
 
@@ -50,6 +51,12 @@ Create heatmap data frame and draw heatmap
 ```python
 shred.create_heatmap_matrix()
 shred.draw_heatmap()
+```
+
+Create GCT file (GCT heatmap is ready to be loaded in Morpheus)
+```python
+shred.createGCT()
+# load the output file of this code onto Morpheus (https://software.broadinstitute.org/morpheus/)
 ```
 
 Do enrichment for all modules
